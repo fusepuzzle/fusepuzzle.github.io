@@ -356,10 +356,21 @@ function reset() {
   state.taps = 0;
   state.log = [];
   state.won = false;
+  clearEffects();
   render(state.board);
   renderHud();
   saveProgress();
 }
+
+// Las animaciones CSS se repiten si su elemento vuelve a mostrarse (al salir del
+// mapa de niveles): se quitan al terminar y al cambiar de tablero.
+function clearEffects() {
+  els.combo.classList.remove('show');
+  els.combo.textContent = '';
+  els.board.classList.remove('shake');
+}
+els.combo.addEventListener('animationend', () => els.combo.classList.remove('show'));
+els.board.addEventListener('animationend', (e) => { if (e.target === els.board) els.board.classList.remove('shake'); });
 
 /* ---------- Progreso del día (por si se cierra la app a medias) ---------- */
 const progressKey = () => `mecha:progress:${state.daily?.key}`;

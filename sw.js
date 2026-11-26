@@ -3,7 +3,7 @@
 //  - El resto sale de la caché y se actualiza en segundo plano.
 // Al instalar se piden los archivos saltándose la caché HTTP del navegador
 // (GitHub Pages la guarda 10 min); si no, una versión nueva podría guardar archivos viejos.
-const CACHE = 'fuse-v21';
+const CACHE = 'fuse-v22';
 const ASSETS = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/app.js', 'js/engine.js', 'js/solver.js', 'js/daily.js', 'js/stats.js', 'js/worker.js', 'js/levels.js', 'js/progress.js',
