@@ -675,7 +675,15 @@ try {
   }
 } catch {}
 
-showDaily();
+// Pestaña inicial: Niveles hasta terminar el primer capítulo (hace de tutorial);
+// después, el reto diario si aún no se ha hecho hoy y, si ya está hecho, Niveles.
+function startMode() {
+  const { best } = loadLevels();
+  const newcomer = CHAPTERS[0].levels.some((l) => best[l.id] == null);
+  const doneToday = !!state.stats.history[dayNumber(dateKey())];
+  return newcomer || doneToday ? 'levels' : 'daily';
+}
+if (startMode() === 'levels') showLevels(); else showDaily();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   // Si llega una versión nueva mientras la app está abierta, se recarga sola
