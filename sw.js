@@ -1,5 +1,5 @@
 // Service worker: funciona sin conexión. Sirve desde caché y actualiza en segundo plano.
-const CACHE = 'fuse-v16';
+const CACHE = 'fuse-v17';
 const ASSETS = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/app.js', 'js/engine.js', 'js/solver.js', 'js/daily.js', 'js/stats.js', 'js/worker.js', 'js/levels.js',

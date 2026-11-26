@@ -121,10 +121,12 @@ svg { display: block; }
 
 /* Marcador */
 .hud { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hud-title { display: flex; align-items: center; gap: 4px; min-width: 0; }
-.eyebrow { white-space: nowrap; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); }
-.title { font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.counters { display: flex; gap: 8px; }
+.hud-title { display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1 1 auto; }
+.hud-title > div { min-width: 0; flex: 0 1 auto; }
+.eyebrow { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); }
+/* Los nombres largos ("Lluvia de flechas") pasan a dos líneas en vez de invadir los contadores */
+.title { font-size: 18px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.counters { display: flex; gap: 8px; flex-shrink: 0; }
 .counter {
   min-width: 64px; padding: 6px 10px; border-radius: 12px; background: var(--surface);
   box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center;
