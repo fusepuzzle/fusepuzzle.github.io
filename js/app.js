@@ -662,5 +662,16 @@ try {
 showDaily();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  // Si llega una versión nueva mientras la app está abierta, se recarga sola
+  // (salvo a mitad de una partida: entonces se aplica la próxima vez que se abra).
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !state.busy && (state.taps === 0 || state.won)) location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .then((reg) => {
+      // al volver a la app desde segundo plano, busca actualizaciones
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    })
+    .catch(() => {});
 }
