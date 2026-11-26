@@ -4,13 +4,22 @@ import {
 } from './engine.js';
 import { dateKey, dayNumber } from './daily.js';
 import { loadStats, saveStats, recordWin, currentStreak, tapEmoji, shareText } from './stats.js';
-import { LEVELS } from './levels.js';
+import { CHAPTERS } from './levels.js';
+import {
+  starsFor, levelStars, totalStars, chapterStars, chapterUnlocked, levelUnlocked, flatLevels, newlyUnlocked,
+} from './progress.js';
 
 const GEN_VERSION = 1; // cambiar si cambia el generador (invalida la caché)
-const PRACTICE = LEVELS;
-const PRACTICE_KEY = 'mecha:practice:v1';
-const loadPractice = () => { try { return JSON.parse(localStorage.getItem(PRACTICE_KEY)) || { index: 0, done: {} }; } catch { return { index: 0, done: {} }; } };
-const savePractice = (p) => { try { localStorage.setItem(PRACTICE_KEY, JSON.stringify(p)); } catch {} };
+const FLAT = flatLevels(CHAPTERS);
+const MAX_STARS = FLAT.length * 3;
+// best: { idNivel: mejor nº de toques }, cur: último nivel jugado (índice en FLAT)
+const LEVELS_KEY = 'mecha:levels:v1';
+const loadLevels = () => {
+  try { const p = JSON.parse(localStorage.getItem(LEVELS_KEY)); if (p?.best) return p; } catch {}
+  return { best: {}, cur: 0 };
+};
+const saveLevels = (p) => { try { localStorage.setItem(LEVELS_KEY, JSON.stringify(p)); } catch {} };
+const isOpen = (i) => i >= 0 && i < FLAT.length && levelUnlocked(CHAPTERS, loadLevels().best, FLAT[i].c, FLAT[i].n);
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -18,12 +27,13 @@ const els = {
   eyebrow: $('label-eyebrow'), title: $('label-title'), prev: $('prev'), next: $('next'),
   share: $('btn-share'), share2: $('btn-share2'), reset: $('btn-reset'),
   tabDaily: $('tab-daily'), tabPractice: $('tab-practice'),
-  dlgHelp: $('dlg-help'), dlgStats: $('dlg-stats'), toast: $('toast'), tip: $('tip'),
+  dlgHelp: $('dlg-help'), dlgStats: $('dlg-stats'), dlgLevel: $('dlg-level'), toast: $('toast'), tip: $('tip'),
+  app: document.querySelector('.app'), map: $('level-map'),
 };
 
 const state = {
-  mode: 'daily',
-  practiceIndex: Math.min(loadPractice().index || 0, PRACTICE.length),
+  mode: 'daily',     // 'daily' | 'levels'
+  cur: Math.min(loadLevels().cur || 0, FLAT.length - 1),
   puzzle: null,      // { board, par, number?, key?, name }
   board: [],
   burnt: new Set(),
@@ -289,15 +299,54 @@ function onWin() {
     state.stats = recordWin(state.stats, state.daily.number, state.taps, state.puzzle.par, emojis);
     saveStats(state.stats);
   }
-  if (state.mode === 'practice' && state.practiceIndex < PRACTICE.length) {
-    const p = loadPractice();
-    const prev = p.done[state.practiceIndex];
-    p.done[state.practiceIndex] = prev ? Math.min(prev, state.taps) : state.taps;
-    savePractice(p);
-    els.eyebrow.textContent = practiceEyebrow(state.practiceIndex);
+  if (state.mode === 'levels') {
+    const p = loadLevels();
+    const { level } = FLAT[state.cur];
+    const before = totalStars(CHAPTERS, p.best);
+    const prevBest = p.best[level.id];
+    p.best[level.id] = prevBest == null ? state.taps : Math.min(prevBest, state.taps);
+    saveLevels(p);
+    const after = totalStars(CHAPTERS, p.best);
+    renderHud();
+    setLevelLabels();
+    setTimeout(() => openLevelWin(before, after, prevBest), reduceMotion ? 100 : 650);
+    return;
   }
   renderHud();
   setTimeout(() => openStats(true), reduceMotion ? 100 : 650);
+}
+
+/* ---------- Victoria en un nivel: estrellas y desbloqueos ---------- */
+const STAR_PATH = 'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z';
+const starSVG = (on) => `<svg class="star ${on ? 'on' : ''}" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR_PATH}"/></svg>`;
+const starsRow = (n) => [0, 1, 2].map((k) => starSVG(k < n)).join('');
+const WIN_TITLES = ['¡Tablero limpio!', '¡Conseguido!', '¡Muy bien!', '¡Perfecto!'];
+
+function openLevelWin(before, after, prevBest) {
+  const { level } = FLAT[state.cur];
+  const got = starsFor(state.taps, level.par);
+  $('lv-stars').innerHTML = starsRow(got);
+  $('lv-stars').setAttribute('aria-label', `${got} de 3 estrellas`);
+  $('lv-title').textContent = WIN_TITLES[got];
+  let sub = `${state.taps} toques · objetivo ${level.par}`;
+  if (got < 3) sub += ` · con ${level.par} toques: 3 estrellas`;
+  $('lv-sub').textContent = sub;
+  const opened = newlyUnlocked(CHAPTERS, before, after);
+  const unlock = $('lv-unlock');
+  unlock.hidden = !opened.length;
+  if (opened.length) unlock.textContent = `🔓 ¡Desbloqueado: ${opened.map((c) => c.name).join(', ')}!`;
+  const better = prevBest != null && state.taps < prevBest;
+  $('lv-record').hidden = !better;
+  const next = $('lv-next');
+  const hasNext = state.cur + 1 < FLAT.length;
+  next.hidden = !hasNext;
+  next.disabled = !isOpen(state.cur + 1);
+  if (hasNext && next.disabled) {
+    const need = FLAT[state.cur + 1].chapter.need;
+    $('lv-lock').hidden = false;
+    $('lv-lock').textContent = `🔒 Para el siguiente capítulo: ${after}/${need} ⭐`;
+  } else $('lv-lock').hidden = true;
+  if (!els.dlgLevel.open) els.dlgLevel.showModal();
 }
 
 function reset() {
@@ -351,6 +400,7 @@ function formatDay(key) {
 async function showDaily() {
   state.mode = 'daily';
   setTabs();
+  setMap(false);
   els.prev.hidden = els.next.hidden = true;
   if (!state.daily) {
     els.loading.hidden = false;
@@ -374,41 +424,81 @@ async function showDaily() {
   }
 }
 
-function practiceEyebrow(idx) {
-  const best = loadPractice().done[idx];
-  return `Nivel ${idx + 1}/${PRACTICE.length}` + (best ? (best <= PRACTICE[idx].par ? ' · ⭐' : ' · ✓') : '');
+/* ---------- Modo Niveles: mapa de capítulos y partida ---------- */
+function setMap(on) {
+  els.app.classList.toggle('on-map', on);
+  els.map.hidden = !on;
 }
 
-const ELEMENT_TIPS = {
-  ice: '🧊 hielo', shield: '🛡️ escudo', barrel: '🛢️ barril', arrow: '➡️ flechas', fragile: '🧱 muro frágil', timer: '⏱️ temporizador',
-};
-
-let randomSeq = 0;
-async function showPractice() {
-  state.mode = 'practice';
+function showLevels() {
+  state.mode = 'levels';
+  state.busy = false;
   setTabs();
-  els.prev.hidden = els.next.hidden = false;
-  const idx = state.practiceIndex;
-  const p = loadPractice(); p.index = idx; savePractice(p);
-  els.prev.disabled = idx === 0;
-  if (idx < PRACTICE.length) {
-    const lvl = PRACTICE[idx];
-    setPuzzle({ board: lvl.board, par: lvl.par }, { eyebrow: practiceEyebrow(idx), title: lvl.name, tip: lvl.tip });
-  } else {
-    els.loading.hidden = false;
-    els.loading.textContent = 'Generando tablero…';
-    state.busy = true;
-    const seq = ++randomSeq;
-    const rp = await generateBySeed(`libre-${Date.now()}-${Math.random()}`);
-    if (seq !== randomSeq || state.mode !== 'practice') return;
-    const mix = Object.keys(rp.elements || {}).map((e) => ELEMENT_TIPS[e]).join(' · ');
-    setPuzzle(rp, { eyebrow: 'Libre', title: `Aleatorio ${idx - PRACTICE.length + 1}`, tip: mix ? `Mezcla: ${mix}` : '' });
+  renderMap();
+  setMap(true);
+  // el nivel actual a la vista
+  els.map.querySelector('.lvl.current')?.scrollIntoView({ block: 'center' });
+}
+
+function renderMap() {
+  const { best } = loadLevels();
+  const total = totalStars(CHAPTERS, best);
+  let html = `<div class="map-head"><span class="map-total">${starSVG(true)}<b>${total}</b> / ${MAX_STARS}</span>` +
+    `<span class="map-hint">3 ⭐ en el objetivo · 2 con +1 · 1 con +2</span></div>`;
+  let flat = 0;
+  CHAPTERS.forEach((ch, c) => {
+    const open = chapterUnlocked(ch, CHAPTERS, best);
+    const sub = open
+      ? `${chapterStars(ch, best)} / ${ch.levels.length * 3} estrellas`
+      : `🔒 Consigue ${ch.need} ⭐ · te faltan ${ch.need - total}`;
+    html += `<section class="chapter${open ? '' : ' locked'}">` +
+      `<div class="ch-head"><span class="mini" data-v="${ch.icon}"></span>` +
+      `<div><div class="ch-name">${ch.name}</div><div class="ch-sub">${sub}</div></div></div><div class="ch-levels">`;
+    ch.levels.forEach((l, n) => {
+      const i = flat++;
+      const unlocked = levelUnlocked(CHAPTERS, best, c, n);
+      const done = best[l.id] != null;
+      const cls = `lvl${unlocked ? '' : ' locked'}${done ? ' done' : ''}${i === state.cur && unlocked ? ' current' : ''}`;
+      html += `<button class="${cls}" data-i="${i}" ${unlocked ? '' : 'disabled'} aria-label="${l.name}${done ? `, ${levelStars(l, best)} estrellas` : ''}${unlocked ? '' : ', bloqueado'}">` +
+        `<span class="lvl-n">${unlocked ? i + 1 : '🔒'}</span>` +
+        `<span class="lvl-name">${l.name}</span>` +
+        `<span class="lvl-stars">${starsRow(levelStars(l, best))}</span></button>`;
+    });
+    html += `</div></section>`;
+  });
+  els.map.innerHTML = html;
+  for (const m of els.map.querySelectorAll('.mini')) {
+    paintCell(m, Number(m.dataset.v), -1);
+    m.classList.add('mini');
+    m.removeAttribute('aria-label');
   }
+}
+
+function setLevelLabels() {
+  const { level } = FLAT[state.cur];
+  const s = levelStars(level, loadLevels().best);
+  els.eyebrow.innerHTML = `Nivel ${state.cur + 1} <span class="eb-stars">${starsRow(s)}</span>`;
+  els.title.textContent = level.name;
+  els.prev.disabled = state.cur === 0;
+  els.next.disabled = !isOpen(state.cur + 1);
+}
+
+function playLevel(i) {
+  if (!isOpen(i)) return;
+  state.mode = 'levels';
+  state.cur = i;
+  const p = loadLevels(); p.cur = i; saveLevels(p);
+  setTabs();
+  setMap(false);
+  els.prev.hidden = els.next.hidden = false;
+  const { level } = FLAT[i];
+  setPuzzle({ board: level.board, par: level.par }, { eyebrow: '', title: level.name, tip: level.tip });
+  setLevelLabels();
 }
 
 function setTabs() {
   els.tabDaily.setAttribute('aria-selected', state.mode === 'daily');
-  els.tabPractice.setAttribute('aria-selected', state.mode === 'practice');
+  els.tabPractice.setAttribute('aria-selected', state.mode === 'levels');
 }
 
 /* ---------- Generación (en un worker para no bloquear) ---------- */
@@ -439,7 +529,6 @@ async function getDaily(key) {
   try { localStorage.setItem(cacheKey, JSON.stringify(p)); } catch {}
   return p;
 }
-const generateBySeed = (seed) => gen({ seed });
 
 /* ---------- Estadísticas, compartir ---------- */
 function openStats(fromWin = false) {
@@ -542,12 +631,20 @@ els.reset.addEventListener('click', () => {
 els.share.addEventListener('click', share);
 els.share2.addEventListener('click', share);
 els.tabDaily.addEventListener('click', () => state.mode !== 'daily' && showDaily());
-els.tabPractice.addEventListener('click', () => state.mode !== 'practice' && showPractice());
-els.prev.addEventListener('click', () => { if (state.practiceIndex > 0) { state.practiceIndex--; showPractice(); } });
-els.next.addEventListener('click', () => { state.practiceIndex++; showPractice(); });
+// La pestaña Niveles lleva siempre al mapa (también desde una partida)
+els.tabPractice.addEventListener('click', () => { if (!state.busy) showLevels(); });
+els.map.addEventListener('click', (e) => {
+  const b = e.target.closest('.lvl');
+  if (b && !b.disabled) playLevel(Number(b.dataset.i));
+});
+els.prev.addEventListener('click', () => playLevel(state.cur - 1));
+els.next.addEventListener('click', () => playLevel(state.cur + 1));
+$('lv-retry').addEventListener('click', () => { els.dlgLevel.close(); reset(); });
+$('lv-next').addEventListener('click', () => { els.dlgLevel.close(); playLevel(state.cur + 1); });
+$('lv-map').addEventListener('click', () => { els.dlgLevel.close(); showLevels(); });
 $('btn-help').addEventListener('click', () => els.dlgHelp.showModal());
 $('btn-stats').addEventListener('click', () => openStats(false));
-for (const d of [els.dlgHelp, els.dlgStats]) {
+for (const d of [els.dlgHelp, els.dlgStats, els.dlgLevel]) {
   d.addEventListener('click', (e) => {
     const r = d.getBoundingClientRect();
     const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;

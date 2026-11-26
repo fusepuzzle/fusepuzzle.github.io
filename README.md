@@ -9,7 +9,12 @@ PWA para móvil, sin servidor, sin dependencias ni paso de compilación.
 - Las cadenas se resuelven por oleadas (todas las que llegan a 4 explotan a la vez).
 - Vacías y muros no reciben carga. Se gana al vaciar el tablero.
 
-## Elementos (en la práctica)
+## Modo Niveles
+8 capítulos de 3 niveles. Estrellas por nivel: objetivo o menos ⭐⭐⭐, objetivo+1 ⭐⭐, objetivo+2 ⭐.
+Cada capítulo pide 6 estrellas más que el anterior (`need` en `js/levels.js`); dentro de un
+capítulo, cada nivel se abre al completar el anterior. Lógica en `js/progress.js`.
+
+## Elementos (en los niveles)
 - 🧊 **Hielo**: el primer impacto solo rompe el hielo.
 - 🛡️ **Escudo**: aguanta dos impactos antes de cargarse.
 - 🛢️ **Barril**: su explosión alcanza las 8 casillas de alrededor.
@@ -18,7 +23,7 @@ PWA para móvil, sin servidor, sin dependencias ni paso de compilación.
 - ⏱️ **Temporizador**: suma 1 de carga cada 3 toques.
 
 Los retos diarios solo usan bombas normales y muros (así no cambian para nadie).
-Los niveles de práctica están en `js/levels.js`, generados con `node tools/make-levels.mjs`.
+Los niveles están en `js/levels.js`, generados con `node tools/make-levels.mjs`.
 
 ## Estructura
 | Archivo | Qué hace |

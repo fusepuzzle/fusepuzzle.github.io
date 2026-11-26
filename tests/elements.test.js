@@ -5,7 +5,8 @@ import {
   chargeOf, armorOf, hasTimers, TIMER_EVERY,
 } from '../js/engine.js';
 import { solve, verify, lowerBound } from '../js/solver.js';
-import { LEVELS } from '../js/levels.js';
+import { CHAPTERS } from '../js/levels.js';
+import { flatLevels } from '../js/progress.js';
 import { dailyPuzzle, randomPractice } from '../js/daily.js';
 
 const B = (cells = {}) => {
@@ -135,8 +136,12 @@ test('el solver sigue siendo óptimo con todos los elementos (contra BFS)', () =
   assert.ok(checked > 20);
 });
 
-test('niveles de práctica: el objetivo guardado es el óptimo y se puede cumplir', () => {
-  assert.ok(LEVELS.length >= 16);
+test('niveles: el objetivo guardado es el óptimo y se puede cumplir', () => {
+  const LEVELS = flatLevels(CHAPTERS).map((x) => x.level);
+  assert.equal(LEVELS.length, 24);
+  assert.equal(new Set(LEVELS.map((l) => l.id)).size, LEVELS.length, 'ids únicos');
+  // el primer capítulo no tiene elementos nuevos
+  for (const l of CHAPTERS[0].levels) assert.ok(l.board.every((v) => v === WALL || (v >= 0 && v <= 3)), l.name);
   for (const lvl of LEVELS) {
     const r = solve(lvl.board, { maxNodes: 2e7 });
     assert.equal(r.par, lvl.par, lvl.name);

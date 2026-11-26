@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Fuse">
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
   <!-- Gráficos del juego -->
@@ -202,8 +202,10 @@
 
     <nav class="modes" role="tablist">
       <button role="tab" class="mode" id="tab-daily" aria-selected="true">Reto diario</button>
-      <button role="tab" class="mode" id="tab-practice" aria-selected="false">Práctica</button>
+      <button role="tab" class="mode" id="tab-practice" aria-selected="false">Niveles</button>
     </nav>
+
+    <section class="level-map" id="level-map" hidden aria-label="Niveles"></section>
 
     <section class="hud">
       <div class="hud-title">
@@ -244,7 +246,7 @@
       <li><span class="mini" data-v="3"></span><span><b>Reacción en cadena.</b> Si una vecina llega a 4 también explota, en oleadas.</span></li>
       <li><span class="mini" data-v="-1"></span><span><b>Muros y huecos</b> no reciben carga y cortan las cadenas.</span></li>
     </ul>
-    <h3 class="section">Elementos de la práctica</h3>
+    <h3 class="section">Elementos de los niveles</h3>
     <ul class="rules">
       <li><span class="mini" data-v="34"></span><span><b>Hielo.</b> El primer impacto solo rompe el hielo; después es una bomba normal.</span></li>
       <li><span class="mini" data-v="1090"></span><span><b>Escudo.</b> Aguanta dos impactos antes de empezar a cargarse.</span></li>
@@ -293,8 +295,26 @@
     </div>
   </dialog>
 
+  <!-- Nivel superado -->
+  <dialog class="sheet" id="dlg-level">
+    <button class="icon-btn close" data-close aria-label="Cerrar"><svg><use href="#i-close"/></svg></button>
+    <div class="lv-win">
+      <div class="lv-stars" id="lv-stars" role="img"></div>
+      <h2 id="lv-title">¡Perfecto!</h2>
+      <p class="lead" id="lv-sub"></p>
+      <p class="lv-badge" id="lv-record" hidden>🏅 ¡Nuevo récord!</p>
+      <p class="lv-badge unlock" id="lv-unlock" hidden></p>
+      <p class="lv-badge" id="lv-lock" hidden></p>
+      <div class="lv-actions">
+        <button class="btn ghost" id="lv-retry"><svg><use href="#i-reset"/></svg>Repetir</button>
+        <button class="btn primary" id="lv-next">Siguiente<svg><use href="#i-right"/></svg></button>
+      </div>
+      <button class="link-btn" id="lv-map">Ver todos los niveles</button>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status"></div>
 
-  <script type="module" src="js/app.js?v=17"></script>
+  <script type="module" src="js/app.js?v=18"></script>
 </body>
 </html>
