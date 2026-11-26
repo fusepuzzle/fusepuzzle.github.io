@@ -19,7 +19,8 @@ capítulo, cada nivel se abre al completar el anterior. Lógica en `js/progress.
 - 🛡️ **Escudo**: aguanta dos impactos antes de cargarse.
 - 🛢️ **Barril**: su explosión alcanza las 8 casillas de alrededor.
 - ➡️ **Flecha**: su explosión recorre la línea hasta un muro, cargando cada bomba.
-- 🧱 **Muro frágil**: corta cadenas; hay que romperlo con una explosión para ganar.
+- 🧱 **Muro frágil**: corta cadenas hasta que una explosión lo rompe; entonces la chispa lo atraviesa
+  y carga la casilla de detrás (puente de un solo uso). Hay que romperlo para ganar.
 - ⏱️ **Temporizador**: suma 1 de carga cada 3 toques.
 
 Los retos diarios solo usan bombas normales y muros (así no cambian para nadie).

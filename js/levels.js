@@ -27,9 +27,9 @@ export const CHAPTERS = [
     {"id":"flechas-3","name":"Diana","tip":"➡️🛢️ Apunta bien: una flecha puede despertar a un barril.","board":[129,3,1,2,1,3,3,3,386,2,3,2,3,3,515,1,2,2,2,2,2,3,3,3,1],"par":8},
   ] },
   { id: "fragil", name: "Muro frágil", icon: -2, need: 30, levels: [
-    {"id":"fragil-1","name":"Muro frágil","tip":"🧱 Corta cadenas, pero hay que romperlo con una explosión al lado para ganar.","board":[-1,2,-1,-2,3,2,3,3,2,3,3,3,1,3,3,2,1,2,3,3,2,3,-1,1,-1],"par":5},
-    {"id":"fragil-2","name":"Grietas","tip":"🧱 Rómpelo pronto para abrir paso… y no dejes que se quede solo.","board":[3,1,-2,3,3,3,3,2,2,2,3,2,-1,-2,2,3,3,2,2,2,1,2,3,3,3],"par":6},
-    {"id":"fragil-3","name":"Derribo","tip":"🧱➡️ Una flecha rompe el primer muro frágil que encuentra y se para ahí.","board":[1,513,2,3,3,2,2,3,2,515,3,3,-2,1,1,1,2,-2,2,2,1,2,2,3,3],"par":8},
+    {"id":"fragil-1","name":"Muro frágil","tip":"🧱 Corta las cadenas hasta que una explosión lo rompe: entonces la chispa lo atraviesa y carga la bomba de detrás.","board":[-1,2,-1,-2,3,2,3,3,2,3,3,3,1,3,3,2,1,2,3,3,2,3,-1,1,-1],"par":5},
+    {"id":"fragil-2","name":"Grietas","tip":"🧱 Cada muro frágil es un puente de un solo uso: rómpelo desde el lado que te convenga.","board":[2,-1,1,1,-2,1,2,1,3,3,-2,3,3,3,3,2,1,3,3,-2,2,3,3,-1,3],"par":8},
+    {"id":"fragil-3","name":"Derribo","tip":"🧱➡️ Una flecha rompe el primer muro frágil que encuentra y su chispa carga la bomba de justo detrás.","board":[1,513,2,3,3,2,2,3,2,515,3,3,-2,1,1,1,2,-2,2,2,1,2,2,3,3],"par":7},
   ] },
   { id: "reloj", name: "Temporizador", icon: 770, need: 36, levels: [
     {"id":"reloj-1","name":"Tic tac","tip":"⏱️ Suma 1 de carga sola cada 3 toques tuyos, toques donde toques.","board":[-1,2,3,2,769,3,1,3,2,2,2,2,-1,2,3,1,2,1,3,3,3,3,3,1,-1],"par":7},
@@ -37,8 +37,8 @@ export const CHAPTERS = [
     {"id":"reloj-3","name":"Contrarreloj","tip":"⏱️ Cuadra los tics para que exploten cuando te convenga.","board":[33,1,-1,3,3,3,770,3,3,3,3,-1,-1,-1,1,3,1,3,2,3,2,3,-1,34,769],"par":9},
   ] },
   { id: "final", name: "Gran final", icon: 3, need: 42, levels: [
-    {"id":"final-1","name":"Todo junto","tip":"🎇 Un poco de todo. Piensa el orden.","board":[1089,3,2,3,3,1,769,3,1,3,1,3,641,-2,1,3,2,3,130,2,3,35,3,2,2],"par":7},
-    {"id":"final-2","name":"Caos","tip":"💥 Mucho que romper y poco margen.","board":[35,3,2,2,3,3,2,3,1,3,131,1,1,259,-2,1090,3,2,2,129,643,3,34,3,2],"par":6},
-    {"id":"final-3","name":"Traca final","tip":"💣 El nivel más duro del juego.","board":[2,3,2,2,641,3,770,34,131,1090,-1,-2,1,-2,-1,2,3,3,33,3,514,3,3,2,130],"par":8},
+    {"id":"final-1","name":"Todo junto","tip":"🎇 Un poco de todo. Piensa el orden.","board":[1089,3,2,3,3,1,769,3,1,3,1,3,641,-2,1,3,2,3,130,2,3,35,3,2,2],"par":6},
+    {"id":"final-2","name":"Caos","tip":"💥 Mucho que romper y poco margen.","board":[3,1,-1,1,-1,-2,35,1091,3,3,3,33,1,2,2,3,129,515,3,641,-1,3,-1,2,131],"par":9},
+    {"id":"final-3","name":"Traca final","tip":"💣 El nivel más duro del juego.","board":[2,3,2,2,641,3,770,34,131,1090,-1,-2,1,-2,-1,2,3,3,33,3,514,3,3,2,130],"par":6},
   ] },
 ];

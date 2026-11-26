@@ -9,9 +9,10 @@
 //   toques >= Déficit - Pares   (y al menos 1 si no tiene temporizador).
 // Los temporizadores regalan como mucho una unidad cada 3 toques cada uno.
 // Si queda un muro frágil al que ninguna bomba puede alcanzar, no hay solución.
+// Un muro frágil deja pasar una unidad a la casilla de detrás: cuenta como un par más.
 import {
   CELLS, LIMIT, WALL, FRAGILE, K, NEIGHBORS, NEIGHBORS8, RAYS, TIMER_EVERY,
-  chargeOf, armorOf, kindOf, isArrow, hasTimers, isCleared, applyTapInPlace,
+  chargeOf, armorOf, kindOf, isArrow, hasTimers, isCleared, applyTapInPlace, beyond,
 } from './engine.js';
 
 // Alcance potencial (ignora muros frágiles: pueden romperse y alargar la línea).
@@ -66,12 +67,20 @@ export function lowerBound(b, phase = 0) {
     occupied++;
     const k = kindOf(v);
     if (k === K.TIMER) timers++;
+    const link = (w) => {
+      pairs.add(u < w ? u * CELLS + w : w * CELLS + u);
+      const a = find(u), z = find(w);
+      if (a !== z) parent[a] = z;
+    };
     for (const w of reach(k, u, b)) {
-      if (b[w] > 0) {
-        pairs.add(u < w ? u * CELLS + w : w * CELLS + u);
-        const a = find(u), z = find(w);
-        if (a !== z) parent[a] = z;
-      } else if (b[w] === FRAGILE) fragileHit[w] = 1;
+      if (b[w] > 0) link(w);
+      else if (b[w] === FRAGILE) {
+        fragileHit[w] = 1;
+        // la chispa atraviesa el muro frágil y alcanza lo que hay detrás
+        let s = u, f = w, m = beyond(s, f);
+        while (m >= 0 && b[m] === FRAGILE) { fragileHit[m] = 1; s = f; f = m; m = beyond(s, f); }
+        if (m >= 0 && b[m] > 0 && m !== u) link(m);
+      }
     }
   }
   for (let i = 0; i < CELLS; i++) if (b[i] === FRAGILE && !fragileHit[i]) return Infinity;

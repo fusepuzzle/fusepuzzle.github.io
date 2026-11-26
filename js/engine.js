@@ -69,6 +69,17 @@ export function targets(kind, i, b, out = []) {
   return out;
 }
 
+/**
+ * Muro frágil = puente de un solo uso: al romperlo una explosión que llega desde
+ * `src`, la chispa lo atraviesa y alcanza la casilla de detrás (misma dirección).
+ * Devuelve esa casilla o -1 si se sale del tablero.
+ */
+export function beyond(src, n) {
+  const [rs, cs] = rc(src), [rn, cn] = rc(n);
+  const r = rn + Math.sign(rn - rs), c = cn + Math.sign(cn - cs);
+  return inside(r, c) ? r * SIZE + c : -1;
+}
+
 // Un impacto (toque, explosión vecina o tic del temporizador).
 // Devuelve 0 nada, 1 recibido, 2 muro roto, 3 recibido y llega a 4 (explota).
 function hit(b, n) {
@@ -88,15 +99,28 @@ function resolve(b, frontier, rec) {
   while (frontier.length) {
     const kinds = frontier.map((c) => kindOf(b[c]));
     for (const c of frontier) b[c] = EMPTY;
-    const hits = [];
-    frontier.forEach((c, k) => targets(kinds[k], c, b, hits));
+    const hits = [], from = [];
+    frontier.forEach((c, k) => {
+      const before = hits.length;
+      targets(kinds[k], c, b, hits);
+      for (let h = before; h < hits.length; h++) from.push(c);
+    });
     const next = [];
     const received = rec ? new Set() : null;
     const broken = rec ? [] : null;
-    for (const n of hits) {
-      const r = hit(b, n);
+    for (let h = 0; h < hits.length; h++) {
+      let src = from[h], n = hits[h];
+      let r = hit(b, n);
+      // la chispa atraviesa los muros frágiles que rompe (puede encadenar varios)
+      while (r === 2) {
+        if (rec) broken.push(n);
+        const m = beyond(src, n);
+        if (m < 0) break;
+        src = n; n = m;
+        r = hit(b, n);
+      }
       if (r === 3) next.push(n);
-      if (rec) { if (r === 2) broken.push(n); else if (r) received.add(n); }
+      if (rec && (r === 1 || r === 3)) received.add(n);
     }
     count += frontier.length;
     if (rec) {

@@ -71,6 +71,8 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
+/* reserva el hueco de la barra de desplazamiento (PC): cambiar de pestaña no mueve nada */
+html { scrollbar-gutter: stable; }
 body {
   background: radial-gradient(120% 80% at 50% 0%, var(--bg-2), var(--bg) 60%) fixed, var(--bg);
   color: var(--ink);
@@ -304,7 +306,11 @@ svg { display: block; }
 .map-total { display: inline-flex; align-items: center; gap: 6px; font-size: 22px; font-weight: 900; color: var(--ink-2); }
 .map-total b { color: var(--ink); }
 .map-total .star { width: 26px; height: 26px; }
-.map-hint { font-size: 12px; color: var(--ink-2); }
+.map-hint { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 8px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.hint-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.hint-stars { display: inline-flex; }
+.hint-stars .star { width: 13px; height: 13px; }
+.hint-dot { opacity: .5; }
 .chapter { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px; display: grid; gap: 10px; }
 .ch-head { display: flex; align-items: center; gap: 12px; }
 .ch-head .mini { width: 44px; height: 44px; flex-shrink: 0; }

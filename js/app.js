@@ -436,15 +436,20 @@ function showLevels() {
   setTabs();
   renderMap();
   setMap(true);
-  // el nivel actual a la vista
-  els.map.querySelector('.lvl.current')?.scrollIntoView({ block: 'center' });
+  // arriba del todo; solo se desplaza si el nivel actual queda fuera de la pantalla
+  window.scrollTo(0, 0);
+  els.map.querySelector('.lvl.current')?.scrollIntoView({ block: 'nearest' });
 }
 
 function renderMap() {
   const { best } = loadLevels();
   const total = totalStars(CHAPTERS, best);
   let html = `<div class="map-head"><span class="map-total">${starSVG(true)}<b>${total}</b> / ${MAX_STARS}</span>` +
-    `<span class="map-hint">3 ⭐ en el objetivo · 2 con +1 · 1 con +2</span></div>`;
+    `<span class="map-hint">` +
+    [[3, 'objetivo'], [2, 'objetivo +1'], [1, 'objetivo +2']]
+      .map(([n, t]) => `<span class="hint-item"><span class="hint-stars">${starSVG(true).repeat(n)}</span>${t}</span>`)
+      .join('<span class="hint-dot">·</span>') +
+    `</span></div>`;
   let flat = 0;
   CHAPTERS.forEach((ch, c) => {
     const open = chapterUnlocked(ch, CHAPTERS, best);
@@ -506,7 +511,7 @@ let worker = null;
 function runWorker(msg) {
   return new Promise((resolve, reject) => {
     try {
-      worker ??= new Worker(new URL('./worker.js?v=14', import.meta.url), { type: 'module' });
+      worker ??= new Worker(new URL('./worker.js?v=20', import.meta.url), { type: 'module' });
       worker.onmessage = (e) => (e.data.ok ? resolve(e.data.puzzle) : reject(e.data.error));
       worker.onerror = (e) => { worker = null; reject(e); };
       worker.postMessage(msg);

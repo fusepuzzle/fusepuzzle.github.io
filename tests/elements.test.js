@@ -53,20 +53,40 @@ test('flecha: recorre la línea cargando cada bomba hasta un muro', () => {
   assert.equal(r.board[5], 1, 'no carga hacia los lados');
 });
 
-test('flecha: un muro frágil se rompe y para la línea', () => {
-  const b = B({ 10: cell(K.RIGHT, 3), 12: FRAGILE, 13: 1 });
+test('flecha: un muro frágil se rompe, la chispa pasa a la casilla de detrás y la línea se para', () => {
+  const b = B({ 10: cell(K.RIGHT, 3), 12: FRAGILE, 13: 1, 14: 1 });
   const r = tap(b, 10);
   assert.equal(r.board[12], EMPTY);
-  assert.equal(r.board[13], 1, 'lo que hay detrás no recibe');
+  assert.equal(r.board[13], 2, 'la de justo detrás recibe');
+  assert.equal(r.board[14], 1, 'la línea no sigue más allá');
   assert.deepEqual(r.waves[0].broken, [12]);
 });
 
-test('muro frágil: no recibe carga, se rompe con una explosión y hay que romperlo para ganar', () => {
+test('muro frágil: se rompe con una explosión y hay que romperlo para ganar', () => {
   const b = B({ 0: 3, 1: FRAGILE });
   assert.ok(!isCleared(B({ 1: FRAGILE })), 'un muro frágil en pie impide ganar');
   const r = tap(b, 0);
   assert.equal(r.board[1], EMPTY);
   assert.ok(isCleared(r.board));
+});
+
+test('muro frágil: al romperse, la chispa lo atraviesa y sigue la cadena al otro lado', () => {
+  // 3 · frágil · 3 · 3 en la fila de arriba
+  const b = B({ 0: 3, 1: FRAGILE, 2: 3, 3: 3 });
+  const r = tap(b, 0);
+  assert.ok(isCleared(r.board), 'un solo toque vacía todo');
+  assert.equal(r.explosions, 3);
+  assert.deepEqual(r.waves[0].received, [2]);
+});
+
+test('muro frágil: puente de un solo uso (vacío detrás o desde la otra dirección)', () => {
+  // desde abajo: la chispa va hacia arriba, fuera del tablero; la bomba de al lado no recibe
+  const r = tap(B({ 6: 3, 1: FRAGILE, 2: 1 }), 6);
+  assert.equal(r.board[1], EMPTY);
+  assert.equal(r.board[2], 1);
+  // barril en diagonal: la chispa sigue en diagonal
+  const r2 = tap(B({ 0: cell(K.BARREL, 3), 6: FRAGILE, 12: 1 }), 0);
+  assert.equal(r2.board[12], 2);
 });
 
 test('temporizador: suma 1 cada 3 toques, toques donde toques', () => {

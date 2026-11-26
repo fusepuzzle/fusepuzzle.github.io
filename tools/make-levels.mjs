@@ -36,9 +36,9 @@ const CHAPTERS = [
     { name: 'Diana', els: { arrow: 2, barrel: 1 }, par: [5, 8], tip: '➡️🛢️ Apunta bien: una flecha puede despertar a un barril.' },
   ] },
   { id: 'fragil', name: 'Muro frágil', icon: -2, levels: [
-    { name: 'Muro frágil', els: { fragile: 1 }, par: [5, 7], tip: '🧱 Corta cadenas, pero hay que romperlo con una explosión al lado para ganar.' },
-    { name: 'Grietas', els: { fragile: 2 }, par: [5, 8], tip: '🧱 Rómpelo pronto para abrir paso… y no dejes que se quede solo.' },
-    { name: 'Derribo', els: { fragile: 2, arrow: 2 }, par: [5, 8], tip: '🧱➡️ Una flecha rompe el primer muro frágil que encuentra y se para ahí.' },
+    { name: 'Muro frágil', els: { fragile: 1 }, par: [5, 7], tip: '🧱 Corta las cadenas hasta que una explosión lo rompe: entonces la chispa lo atraviesa y carga la bomba de detrás.' },
+    { name: 'Grietas', els: { fragile: 3 }, par: [5, 8], tip: '🧱 Cada muro frágil es un puente de un solo uso: rómpelo desde el lado que te convenga.' },
+    { name: 'Derribo', els: { fragile: 2, arrow: 2 }, par: [5, 8], tip: '🧱➡️ Una flecha rompe el primer muro frágil que encuentra y su chispa carga la bomba de justo detrás.' },
   ] },
   { id: 'reloj', name: 'Temporizador', icon: 770, levels: [
     { name: 'Tic tac', els: { timer: 1 }, par: [5, 8], tip: '⏱️ Suma 1 de carga sola cada 3 toques tuyos, toques donde toques.' },
